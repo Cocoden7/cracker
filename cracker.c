@@ -1,6 +1,3 @@
-#include <stdlib.h>
-#include <stdio.h>
-
 int NTHREAD = 1;
 bool CONS = false;
 bool FILEOUT = false;
@@ -40,10 +37,31 @@ public void readfile(const char *filename){
 	fstat(file, buf);
 	off_t size = buf->st_size;
 	int sizetab = (int) size/32;
-	char *tab1[sizetab];
+	uint8_t *tab1[sizetab];
 	for (int i = 0; i < sizetab; ++i)
 	{
 		fgets(tab1[i],32,file);
 	}
+	close(file);
+
+}
+
+public void traduction(){
+	/* à modifier */
+	char *tab2[sizetab];
+	for (int i = 0; i < sizetab; ++i)
+	{
+		reversehash(tab1[i],tab2[i],32);
+	}
+}
+
+typedef struct node
+{
+	struct node *next;
+	char* mdp;
+} node_t;
+
+public void compare(node_t head){
+
 
 }
