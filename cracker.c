@@ -1,3 +1,8 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <reverse.h>
+#include <sha256.h>
+
 int NTHREAD = 1;
 bool CONS = false;
 bool FILEOUT = false;
