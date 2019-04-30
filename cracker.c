@@ -2,11 +2,15 @@
 #include <stdio.h>
 #include <reverse.h>
 #include <sha256.h>
+#include <semaphore.h>
+#include <pthread.h>
+
 
 int NTHREAD = 1;
 bool CONS = false;
 bool FILEOUT = false;
-
+uint8_t *TAB1[NTHREAD];
+pthread_t mutex_t mutex1 = PTHREAD_MUTEX_INITIALIZER;
 
 int main(int argc, char const *argv[])
 {
@@ -14,7 +18,7 @@ int main(int argc, char const *argv[])
 	{
 		if (strcmp(argv[i],"-t"))
 		{
-			NTHREAD = atoi(argv[i+1])
+			NTHREAD = atoi(argv[i+1]);
 		}
 		if (strcmp(argv[i],"-c"))
 		{
@@ -31,22 +35,28 @@ int main(int argc, char const *argv[])
 	return 0;
 }
 
-public void readfile(const char *filename){
+public int readFile(const char *filename){
 
-	FILE* file = fopen(filename, "r");
-	if (file == NULL)
+	int file = open(filename, O_RDONLY);
+	if (file == -1)
 	{
 		printf("Impossible d'ouvrir le fichier %s. \n", filename);
+		return -1;
 	}
-	struct stat *buf = malloc(sizeof(struct stat));
-	fstat(file, buf);
-	off_t size = buf->st_size;
-	int sizetab = (int) size/32;
-	uint8_t *tab1[sizetab];
-	for (int i = 0; i < sizetab; ++i)
-	{
-		fgets(tab1[i],32,file);
+	int i = 0
+	while(true){
+        pthread_mutex_lock(&mutex1);
+        int cursor = read(file, TAB1[i], 32);
+        if(cursor == -1){
+            printf("Erreur lors de la lecture.");
+        }
+        pthread_mutex_unlock(&mutex1);
+        i++;
+        if(i == NTHREAD){
+            i = 0;
+        }
 	}
+
 	close(file);
 
 }
