@@ -1,16 +1,25 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <reverse.h>
-#include <sha256.h>
 #include <semaphore.h>
 #include <pthread.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 
 int NTHREAD = 1;
-bool CONS = false;
-bool FILEOUT = false;
-uint8_t *TAB1[NTHREAD];
-pthread_t mutex_t mutex1 = PTHREAD_MUTEX_INITIALIZER;
+int CONS = false;
+int FILEOUT = 0;
+sem_t empty; // Nombre de places vides
+sem_t full; // Nombre de places pleines
+pthread_mutex_t mutex1;
+pthread_mutex_t mutex2;
+
+pthread_mutex_init(&mutex1, NULL);
+pthread_mutex_init(&mutex2, NULL);
+sem_init(&empty, 0, NTHREAD);
+sem_init(&full, 0, 0);
+const char *filename = 'c';
+
 
 int main(int argc, char const *argv[])
 {
@@ -19,6 +28,7 @@ int main(int argc, char const *argv[])
 		if (strcmp(argv[i],"-t"))
 		{
 			NTHREAD = atoi(argv[i+1]);
+			i++;
 		}
 		if (strcmp(argv[i],"-c"))
 		{
@@ -26,47 +36,56 @@ int main(int argc, char const *argv[])
 		}
 		if (strcmp(argv[i],"-o"))
 		{
-			FILEOUT = true;
+			FILEOUT = 1;
+			i++;
+		}
+		else{
+            const char *filename = argv[i];
 		}
 	}
+	#define NTHREAD NTHREAD
+	uint8_t *TAB1[NTHREAD];
 
-
+    int file = open(filename, O_RDONLY);
+    if (file == -1)
+        {
+            printf("Impossible d'ouvrir le fichier %s. \n", filename);
+            return -1;
+        }
+    readFile(file);
 
 	return 0;
 }
 
-public int readFile(const char *filename){
-
-	int file = open(filename, O_RDONLY);
-	if (file == -1)
-	{
-		printf("Impossible d'ouvrir le fichier %s. \n", filename);
-		return -1;
-	}
-	int i = 0
-	while(true){
+int readFile(int file){
+    int i = 0;
+	while(1){
+        sem_wait(&empty);
         pthread_mutex_lock(&mutex1);
-        int cursor = read(file, TAB1[i], 32);
-        if(cursor == -1){
+        if(read(file, TAB1[i], 32) == -1){
             printf("Erreur lors de la lecture.");
         }
-        pthread_mutex_unlock(&mutex1);
         i++;
-        if(i == NTHREAD){
+        if(i >= NTHREAD){
             i = 0;
         }
+        pthread_mutex_unlock(&mutex1);
+        sem_post(&full);
 	}
 
 	close(file);
 
 }
 
-public void traduction(){
+void traduction(){
 	/* à modifier */
-	char *tab2[sizetab];
-	for (int i = 0; i < sizetab; ++i)
-	{
-		reversehash(tab1[i],tab2[i],32);
+	while(true){
+	    int i = 0;
+        sem_wait(&full); // Verifie que les threads ne lisent pas un buffer vide
+        pthread_mutex_lock(&mutex2); // Verifie que 2 threads ne le font pas en meme temps
+        reversehash(TAB1[i], TAB2[i], 32);
+        pthread_mutex_unlock(&mutex2);
+        sem_post(&empty);
 	}
 }
 
@@ -76,7 +95,7 @@ typedef struct node
 	char* mdp;
 } node_t;
 
-public void compare(node_t head){
+void compare(node_t head){
 
 
 }
