@@ -7,8 +7,8 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdbool.h>
-#include "reverse.c"
-#include "sha256.c"
+#include "src/reverse.c"
+#include "src/sha256.c"
 
 typedef u_int8_t uint8_t;
 // Signatures fonction
@@ -17,13 +17,13 @@ int readFile(int file);
 
 int NTHREAD = 1;
 int CONS = 0;
-int FILEOUT = 0;
+char* FILEOUT = 0;
 sem_t number_of_empty; // Nombre de places vides
 sem_t number_of_full; // Nombre de places pleines
 pthread_mutex_t mutex1;
 pthread_mutex_t mutex2;
 
-const char filename = 'c';
+char *filename;
 
 int FINISH = 0;
 uint8_t **tab1;
@@ -33,59 +33,64 @@ int main(int argc, char const *argv[])
 {
     pthread_mutex_init(&mutex1, NULL);
     pthread_mutex_init(&mutex1, NULL);
-    sem_init(&number_of_empty, 0, NTHREAD);
-    sem_init(&number_of_full, 0, 0);
-	for (int i = 0; i < argc || i < 5; ++i)
+	for (int i = 1; i < argc && i < 5; ++i)
 	{
-		if (strcmp(argv[i],"-t"))
+		if (strcmp(argv[i],"-t")==0)
 		{
 			NTHREAD = atoi(argv[i+1]);
-			i++;
+			i+=1;
 		}
-		if (strcmp(argv[i],"-c"))
+		if (strcmp(argv[i],"-c")==0)
 		{
 			CONS = 1;
 		}
-		if (strcmp(argv[i],"-o"))
+		if (strcmp(argv[i],"-o")==0)
 		{
-			FILEOUT = 1;
-			i++;
+			FILEOUT = (char*) malloc(sizeof(argv[i+1]));
+			strcpy(FILEOUT, argv[i+1]);
+			i+=1;
 		}
 		else{
-            const char *filename = argv[i];
+			filename = (char*) malloc(sizeof(argv[i]));
+            strcpy(filename, argv[i]);
 		}
 
 	}
-	tab1 = (uint8_t**)malloc(NTHREAD * sizeof(uint8_t));
-	tab2 = (char**)malloc(NTHREAD * 16);
-
-    int file = open(&filename, O_RDONLY);
+	tab1 = (uint8_t**)malloc(NTHREAD*sizeof(char));
+	tab2 = (char**)malloc(NTHREAD*sizeof(char));
+    sem_init(&number_of_empty, 0, NTHREAD-1);
+    sem_init(&number_of_full, 0, 1);
+    int file = open(filename, O_RDONLY);
     if (file == -1)
         {
-            printf("Impossible d'ouvrir le fichier %i. \n", filename);
+            printf("Impossible d'ouvrir le fichier %s. \n", filename);
             return -1;
         }
-
     pthread_t *list_of_threads = (pthread_t*)malloc(NTHREAD * sizeof(pthread_t));
     for(int i = 0; i < NTHREAD; i++){
         pthread_create(&list_of_threads[i], NULL, traduction, 0);
     }
     readFile(file);
-
+    printf("apres readfile\n");
 	return 0;
 }
 int COMPTEUR = 1;
 
 // Prends un fd en argument, stock son contenu dans tab1.
 int readFile(int file){
+	printf("debut readfile\n");
+	tab1[0] = (uint8_t *) malloc(32*sizeof(uint8_t));
     int r = read(file, tab1[0], 32);
     if(r == -1){
-        printf("error");
+        printf("error\n");
         exit(1);
     }
+    printf("apres read\n");
 	while(r != 0){
-        sem_wait(&number_of_empty);
+		sem_wait(&number_of_empty);
+		printf("rentre dans la boucle readfile\n");
         // pthread_mutex_lock(&mutex1);
+        tab1[COMPTEUR] = (uint8_t *) malloc(32*sizeof(uint8_t));
         r = read(file, tab1[COMPTEUR], 32);
         if(r == -1){
             printf("Erreur lors de la lecture.");
@@ -98,6 +103,7 @@ int readFile(int file){
         // pthread_mutex_unlock(&mutex1);
         sem_post(&number_of_full);
 	}
+	printf("1er while\n");
     FINISH = 1;
 
 	close(file);
@@ -106,8 +112,9 @@ int readFile(int file){
 
 int COMPTEUR2 = 1;
 void *traduction(void *arg){
-	/* à modifier */
+	printf("debut traduction\n");
 	while(!FINISH){
+		printf("rentre dans le while traduction\n");
         sem_wait(&number_of_full); // Verifie que les threads ne lisent pas un buffer vide
         pthread_mutex_lock(&mutex2); // Verifie que 2 threads ne le font pas en meme temps
         COMPTEUR2++;
@@ -115,8 +122,10 @@ void *traduction(void *arg){
             COMPTEUR2 = 0;
         }
         pthread_mutex_unlock(&mutex2);
-        reversehash(tab1[COMPTEUR2], tab2[COMPTEUR2], 32);
-
+        printf("avant reversehash\n");
+        tab2[COMPTEUR2] = (char *) malloc(16*sizeof(char));
+        reversehash(tab1[COMPTEUR2], tab2[COMPTEUR2], 16);
+        printf("%s\n",tab2[COMPTEUR2]);
         sem_post(&number_of_empty);
 	}
 	return(EXIT_SUCCESS);
