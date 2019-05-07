@@ -7,7 +7,7 @@
 
 
 int NTHREAD = 1;
-int CONS = false;
+int CONS = 0;
 int FILEOUT = 0;
 sem_t empty; // Nombre de places vides
 sem_t full; // Nombre de places pleines
@@ -32,7 +32,7 @@ int main(int argc, char const *argv[])
 		}
 		if (strcmp(argv[i],"-c"))
 		{
-			CONS = true;
+			CONS = 1;
 		}
 		if (strcmp(argv[i],"-o"))
 		{
@@ -93,9 +93,117 @@ typedef struct node
 {
 	struct node *next;
 	char* mdp;
-} node_t;
+}node_t;
 
-void compare(node_t head){
+typedef struct list {
+  struct node *first;
+  int size;
+} list_t;
 
+char **tab2;
+int sizetab;
+char voyelles[6] = {'a','e','i','o','u','y'};
 
+int isvoyelle(char c){
+	if (c == voyelles[0] || c == voyelles[1] || c == voyelles[2] || c == voyelles[3] || c == voyelles[4] || c == voyelles[5])
+	{
+		return 1;
+	}
+	else{
+		return 0;
+	}
+}
+
+int isconsonne(char c){
+	if (c != voyelles[0] && c != voyelles[1] && c != voyelles[2] && c != voyelles[3] && c != voyelles[4] && c != voyelles[5])
+	{
+		return 1;
+	}
+	else{
+		return 0;
+	}
+}
+
+int countl(int cons, char *str){
+	int count = 0;
+	if (cons==1){
+		for (int i = 0; i < 6; ++i)
+		{
+			if (isconsonne(str[i])==1)
+			{
+				++count;
+			}
+		}
+	}
+	else{
+		for (int i = 0; i < 6; ++i)
+		{
+			if (isvoyelle(str[i])==1)
+			{
+				++count;
+			}
+		}
+	}
+	return count;
+}
+
+node_t *init_node(char *value) {
+	char* val = malloc(sizeof(value));
+	strcpy(val,value);
+	node_t n = {NULL,val};
+	node_t* nod = malloc(sizeof(n));
+	if(nod==NULL){
+	    return NULL;
+	}
+	*nod=n;
+	return nod;
+}
+
+int add_node(list_t *list, char *value){
+	if(list==NULL){
+    	return 1;
+	}
+	node_t* n = init_node(value);
+	if(n==NULL){
+	    return 1;
+	}
+	n->next=list->first;
+	list->first=n;
+	list->size++;
+	return 0;
+}
+
+void compare(int cons){
+	struct list l = {NULL,0};
+	struct list *liste = malloc(sizeof(l));
+	*liste = l;
+	add_node(liste,tab2[0]);
+	for (int i = 1; i < sizetab; ++i)
+	{
+		 if (countl(cons, tab2[i])>countl(cons, liste->first->mdp))
+		 {
+		 	free(liste);
+		 	liste = malloc(sizeof(struct list));
+			*liste = (struct list) {NULL,0};
+		 	int j = add_node(liste,tab2[i]);
+		 	if (j==1)
+		 	{
+		 		printf("erreur add_node\n");
+		 	}
+		 }
+		 else if (countl(cons, tab2[i])==countl(cons, liste->first->mdp))
+		 {
+		 	add_node(liste,tab2[i]);
+		 }
+	}
+	struct node *pointeur = malloc(sizeof(struct node));
+	pointeur = liste->first;
+	int file_out = open("file_out.txt",O_WRONLY|O_CREAT|O_TRUNC|O_APPEND);
+	for (int i = 0; i<liste->size; ++i)
+	{
+		printf("%s\n",pointeur->mdp);
+		write(file_out,pointeur->mdp,sizeof(pointeur->mdp));
+		pointeur=pointeur->next;
+	}
+	close(file_out);
 }
