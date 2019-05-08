@@ -4,89 +4,155 @@
 #include <pthread.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <string.h>
+#include <unistd.h>
+#include <stdbool.h>
+#include "src/reverse.h"
+#include "src/sha256.h"
+#include <inttypes.h>
 
+typedef u_int8_t uint8_t;
+// Signatures fonction
+void *traduction(void *arg);
+void *compare(void *arg);
+int readFile(int file);
+bool isTabEmpty(uint8_t **tab);
 
 int NTHREAD = 1;
 int CONS = 0;
-int FILEOUT = 0;
-sem_t empty; // Nombre de places vides
-sem_t full; // Nombre de places pleines
+char* FILEOUT = 0;
+sem_t number_of_empty; // Nombre de places vides
+sem_t number_of_full; // Nombre de places pleines
+sem_t empty2;
+sem_t full2;
+sem_t gocomp;
+sem_t finish;
+sem_t tradgo;
 pthread_mutex_t mutex1;
 pthread_mutex_t mutex2;
 
-pthread_mutex_init(&mutex1, NULL);
-pthread_mutex_init(&mutex2, NULL);
-sem_init(&empty, 0, NTHREAD);
-sem_init(&full, 0, 0);
-const char *filename = 'c';
+char *filename;
 
+int FINISH = 0;
+uint8_t *tab1;
+char *tab2;
+int r;
 
 int main(int argc, char const *argv[])
 {
-	for (int i = 0; i < argc || i < 5; ++i)
+    pthread_mutex_init(&mutex1, NULL);
+    pthread_mutex_init(&mutex1, NULL);
+	for (int i = 1; i < argc && i < 5; ++i)
 	{
-		if (strcmp(argv[i],"-t"))
+		if (strcmp(argv[i],"-t")==0)
 		{
 			NTHREAD = atoi(argv[i+1]);
-			i++;
+			i+=1;
 		}
-		if (strcmp(argv[i],"-c"))
+		if (strcmp(argv[i],"-c")==0)
 		{
 			CONS = 1;
 		}
-		if (strcmp(argv[i],"-o"))
+		if (strcmp(argv[i],"-o")==0)
 		{
-			FILEOUT = 1;
-			i++;
+			FILEOUT = (char*) malloc(sizeof(argv[i+1]));
+			strcpy(FILEOUT, argv[i+1]);
+			i+=1;
 		}
 		else{
-            const char *filename = argv[i];
+			filename = (char*) malloc(sizeof(argv[i]));
+            strcpy(filename, argv[i]);
 		}
-	}
-	#define NTHREAD NTHREAD
-	uint8_t *TAB1[NTHREAD];
 
+	}
+	tab1 = (uint8_t*)malloc(NTHREAD*sizeof(char));
+	/*tab1[0] = (uint8_t*)malloc(sizeof(uint8_t)*32);*/
+	tab2 = (char*)malloc(16*sizeof(char));
+    sem_init(&number_of_empty, 0, NTHREAD-1);
+    sem_init(&number_of_full, 0, 1);
+    sem_init(&empty2, 0, 1);
+    sem_init(&full2, 0, 0);
+    sem_init(&gocomp, 0, 0);
+    sem_init(&finish, 0, 0);
+    sem_init(&tradgo, 0, 0);
     int file = open(filename, O_RDONLY);
     if (file == -1)
         {
             printf("Impossible d'ouvrir le fichier %s. \n", filename);
             return -1;
         }
+    pthread_t *list_of_threads = (pthread_t*)malloc(NTHREAD * sizeof(pthread_t));
+    for(int i = 0; i < NTHREAD; i++){
+        pthread_create(&list_of_threads[i], NULL, traduction, 0);
+    }
+    pthread_t *thread_compare = (pthread_t*)malloc(sizeof(pthread_t));
+    /*printf("avant pthread_create\n");*/
+    pthread_create(thread_compare, NULL, compare, 0);
+    printf("apres avoir cree le thread_compare\n");
     readFile(file);
+    printf("apres readfile\n");
+	sem_wait(&finish);
+	return 0;
+}
+int COMPTEUR = 1;
 
+// Prends un fd en argument, stock son contenu dans tab1.
+int readFile(int file){
+	/*printf("debut readfile\n");*/
+    r = read(file, tab1, 32);
+    if(r == -1){
+        printf("error\n");
+        exit(1);
+    }
+    sem_post(&tradgo);
+    /*printf("apres read\n");*/
+	while(r != 0){
+		sem_wait(&number_of_empty);
+		printf("rentre dans la boucle readfile\n");
+        // pthread_mutex_lock(&mutex1);
+        r = read(file, tab1, 32);
+        if(r == -1){
+            printf("Erreur lors de la lecture.");
+            exit(1);
+        }
+        COMPTEUR++;
+        if(COMPTEUR >= NTHREAD){
+            COMPTEUR = 0;
+        }
+        // pthread_mutex_unlock(&mutex1);
+        sem_post(&number_of_full);
+        printf("fin de readfile\n");
+	}
+    FINISH = 1;
+
+	close(file);
 	return 0;
 }
 
-int readFile(int file){
-    int i = 0;
-	while(1){
-        sem_wait(&empty);
-        pthread_mutex_lock(&mutex1);
-        if(read(file, TAB1[i], 32) == -1){
-            printf("Erreur lors de la lecture.");
-        }
-        i++;
-        if(i >= NTHREAD){
-            i = 0;
-        }
-        pthread_mutex_unlock(&mutex1);
-        sem_post(&full);
-	}
-
-	close(file);
-
-}
-
-void traduction(){
-	/* à modifier */
-	while(true){
-	    int i = 0;
-        sem_wait(&full); // Verifie que les threads ne lisent pas un buffer vide
+int COMPTEUR2 = 0;
+void *traduction(void *arg){
+	sem_wait(&tradgo);
+	printf("debut traduction\n");
+	while(r != 0){
+        sem_wait(&number_of_full); // Verifie que les threads ne lisent pas un buffer vide
         pthread_mutex_lock(&mutex2); // Verifie que 2 threads ne le font pas en meme temps
-        reversehash(TAB1[i], TAB2[i], 32);
+		printf("rentre dans le while traduction\n");
+        COMPTEUR2++;
+        if(COMPTEUR2 >= NTHREAD){
+            COMPTEUR2 = 0;
+        }
         pthread_mutex_unlock(&mutex2);
-        sem_post(&empty);
+        
+        sem_wait(&empty2);
+        printf("avant reversehash\n");
+        reversehash(tab1, tab2, 16);
+        *tab1='\0';
+        printf("%s\n",tab2);
+        sem_post(&full2);
+        sem_post(&number_of_empty);
+        printf("fin traduction\n");
 	}
+	return(EXIT_SUCCESS);
 }
 
 typedef struct node
@@ -100,7 +166,6 @@ typedef struct list {
   int size;
 } list_t;
 
-char **tab2;
 int sizetab;
 char voyelles[6] = {'a','e','i','o','u','y'};
 
@@ -173,37 +238,64 @@ int add_node(list_t *list, char *value){
 	return 0;
 }
 
-void compare(int cons){
+void *compare(void *arg){
+	printf("debut compare\n");
 	struct list l = {NULL,0};
 	struct list *liste = malloc(sizeof(l));
 	*liste = l;
-	add_node(liste,tab2[0]);
-	for (int i = 1; i < sizetab; ++i)
-	{
-		 if (countl(cons, tab2[i])>countl(cons, liste->first->mdp))
-		 {
-		 	free(liste);
-		 	liste = malloc(sizeof(struct list));
+	int first=1;
+	while(!FINISH){
+		sem_wait(&full2);
+		printf("boucle compare\n");
+		if (first)
+		{
+			printf("ok1\n");
+			add_node(liste,tab2);
+			first=0;
+		}
+		else if (countl(CONS, tab2)>countl(CONS, liste->first->mdp))
+		{
+			printf("ok2\n");
+			free(liste);
+			liste = malloc(sizeof(struct list));
 			*liste = (struct list) {NULL,0};
-		 	int j = add_node(liste,tab2[i]);
-		 	if (j==1)
-		 	{
-		 		printf("erreur add_node\n");
-		 	}
-		 }
-		 else if (countl(cons, tab2[i])==countl(cons, liste->first->mdp))
-		 {
-		 	add_node(liste,tab2[i]);
-		 }
+			int j = add_node(liste,tab2);
+			if (j==1)
+			{
+				printf("erreur add_node\n");
+			}
+		}
+		else if (countl(CONS, tab2)==countl(CONS, liste->first->mdp))
+		{
+			printf("ok3\n");
+			add_node(liste,tab2);
+		}
+		sem_post(&empty2);
+		printf("fin boucle compare\n");
 	}
+	printf("apres le while compare\n");
 	struct node *pointeur = malloc(sizeof(struct node));
 	pointeur = liste->first;
-	int file_out = open("file_out.txt",O_WRONLY|O_CREAT|O_TRUNC|O_APPEND);
+	/*int file_out = open("file_out.txt",O_WRONLY|O_CREAT|O_TRUNC|O_APPEND);*/
 	for (int i = 0; i<liste->size; ++i)
 	{
 		printf("%s\n",pointeur->mdp);
-		write(file_out,pointeur->mdp,sizeof(pointeur->mdp));
+		/*write(file_out,pointeur->mdp,sizeof(pointeur->mdp));*/
 		pointeur=pointeur->next;
 	}
-	close(file_out);
+	/*close(file_out);*/
+	free(liste);
+	sem_post(&finish);
+	return EXIT_SUCCESS;
+}
+
+bool isTabEmpty(uint8_t** tab){
+	for (int i = 0; i < NTHREAD; ++i)
+	{
+		if (*tab[i] !='\0')
+		{
+			return false;
+		}
+	}
+	return true;
 }
