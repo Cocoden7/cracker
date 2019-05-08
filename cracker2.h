@@ -38,6 +38,7 @@ int isconsonne(char c);
 int countl(int cons, char *str);
 node_t *init_node(char *value);
 int add_node(list_t *list, char *value);
-void compare(int cons);
+void *compare(void *arg);
+bool isTabEmpty(uint8_t **tab);
 
 #endif
