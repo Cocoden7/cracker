@@ -10,8 +10,8 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdbool.h>
-#include "reverse.h"
-#include "sha256.h"
+#include "src/reverse.h"
+#include "src/sha256.h"
 
 extern int NTHREAD = 1;
 extern int CONS = 0;
