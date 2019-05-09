@@ -31,7 +31,7 @@ sem_t tradgo;
 pthread_mutex_t mutex1;
 pthread_mutex_t mutex2;
 
-char *filename;
+char **filename;
 
 int FINISH = 0;
 uint8_t *tab1;
@@ -42,7 +42,7 @@ int main(int argc, char const *argv[])
 {
     pthread_mutex_init(&mutex1, NULL);
     pthread_mutex_init(&mutex1, NULL);
-	for (int i = 1; i < argc && i < 5; ++i)
+	for (int i = 1; i < argc; ++i)
 	{
 		if (strcmp(argv[i],"-t")==0)
 		{
@@ -60,8 +60,15 @@ int main(int argc, char const *argv[])
 			i+=1;
 		}
 		else{
-			filename = (char*) malloc(sizeof(argv[i]));
-            strcpy(filename, argv[i]);
+			filename = (char**) malloc(argc-i);
+			for (int j = 0; j <= argc-i; ++j)
+			{
+				filename[j] = (char*) malloc(sizeof(argv[i]));
+            	strcpy(filename[j], argv[i]);
+            	printf("%s\n", filename[j]);
+            	++i;
+			}
+			
 		}
 
 	}
@@ -75,12 +82,7 @@ int main(int argc, char const *argv[])
     sem_init(&gocomp, 0, 0);
     sem_init(&finish, 0, 0);
     sem_init(&tradgo, 0, 0);
-    int file = open(filename, O_RDONLY);
-    if (file == -1)
-        {
-            printf("Impossible d'ouvrir le fichier %s. \n", filename);
-            return -1;
-        }
+    
     pthread_t *list_of_threads = (pthread_t*)malloc(NTHREAD * sizeof(pthread_t));
     for(int i = 0; i < NTHREAD; i++){
         pthread_create(&list_of_threads[i], NULL, traduction, 0);
@@ -89,7 +91,20 @@ int main(int argc, char const *argv[])
     /*printf("avant pthread_create\n");*/
     pthread_create(thread_compare, NULL, compare, 0);
     printf("apres avoir cree le thread_compare\n");
-    readFile(file);
+    int file;
+    for (int i = 0; filename[i] != NULL; ++i)
+    {
+    	file = open(filename[i], O_RDONLY);
+    	if (file == -1)
+        {
+            printf("Impossible d'ouvrir le fichier %s. \n", filename[i]);
+            return -1;
+        }
+        readFile(file);
+        close(file);
+    }
+    FINISH = 1;
+    
     printf("apres readfile\n");
 	sem_wait(&finish);
 	return 0;
@@ -123,8 +138,6 @@ int readFile(int file){
         sem_post(&number_of_full);
         printf("fin de readfile\n");
 	}
-    FINISH = 1;
-
 	close(file);
 	return 0;
 }
@@ -133,7 +146,7 @@ int COMPTEUR2 = 0;
 void *traduction(void *arg){
 	sem_wait(&tradgo);
 	printf("debut traduction\n");
-	while(r != 0){
+	while(!FINISH){
         sem_wait(&number_of_full); // Verifie que les threads ne lisent pas un buffer vide
         pthread_mutex_lock(&mutex2); // Verifie que 2 threads ne le font pas en meme temps
 		printf("rentre dans le while traduction\n");
@@ -142,10 +155,13 @@ void *traduction(void *arg){
             COMPTEUR2 = 0;
         }
         pthread_mutex_unlock(&mutex2);
-        
         sem_wait(&empty2);
         printf("avant reversehash\n");
-        reversehash(tab1, tab2, 16);
+        if (*tab1 != '\0')
+        {
+        	reversehash(tab1, tab2, 16);
+        }
+        
         *tab1='\0';
         printf("%s\n",tab2);
         sem_post(&full2);
@@ -192,7 +208,7 @@ int isconsonne(char c){
 int countl(int cons, char *str){
 	int count = 0;
 	if (cons==1){
-		for (int i = 0; i < 6; ++i)
+		for (int i = 0; str[i]!='\0'; ++i)
 		{
 			if (isconsonne(str[i])==1)
 			{
@@ -201,7 +217,7 @@ int countl(int cons, char *str){
 		}
 	}
 	else{
-		for (int i = 0; i < 6; ++i)
+		for (int i = 0; str[i]!='\0' ; ++i)
 		{
 			if (isvoyelle(str[i])==1)
 			{
