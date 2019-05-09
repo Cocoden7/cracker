@@ -1,5 +1,5 @@
 CFLAGS= -o cracker -Wall -Werror -std=c99 -pthread -g
-TARGETS = cracker sha256.o reverse.o cracker.o
+TARGETS = cracker *.o
 
 cracker : cracker.c cracker.h src/reverse.c src/reverse.h src/sha256.c src/sha256.h
 	gcc -c cracker.c -Wall -Werror -std=c99 -g

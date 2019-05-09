@@ -16,7 +16,8 @@ typedef u_int8_t uint8_t;
 void *traduction(void *arg);
 void *compare(void *arg);
 int readFile(int file);
-bool isTabEmpty(uint8_t **tab);
+bool isTab1Empty(uint8_t **tab);
+bool isTab2Empty(char **tab);
 
 int NTHREAD = 1;
 int CONS = 0;
@@ -36,7 +37,10 @@ char **filename;
 int FINISH = 0;
 uint8_t **tab1;
 char **tab2;
-int r;
+int r=1;
+int COMPTEUR3 = 0;
+int count = 0;
+char *flag;
 
 int main(int argc, char const *argv[])
 {
@@ -81,21 +85,33 @@ int main(int argc, char const *argv[])
 	{
 		tab1[i] = (uint8_t*)malloc(32);
 	}
-	tab2 = (char**)malloc(sizeof(char*));
+	tab2 = (char**)malloc(NTHREAD*sizeof(char*));
+	for(int i = 0; i < NTHREAD; ++i)
 	{
 		tab2[i] = (char*)malloc(16);
 	}
-    sem_init(&number_of_empty, 0, NTHREAD-1);
-    sem_init(&number_of_full, 0, 1);
-    sem_init(&empty2, 0, 1);
+	flag = (char*)malloc(NTHREAD);
+	for (int i = 0; i < NTHREAD; ++i)
+	{
+		flag[i]='0';
+	}
+	for (int i = 0; i < NTHREAD; ++i)
+	{
+		flag[i]='0';
+	}
+    sem_init(&number_of_empty, 0, NTHREAD);
+    sem_init(&number_of_full, 0, 0);
+    sem_init(&empty2, 0, NTHREAD);
     sem_init(&full2, 0, 0);
     sem_init(&gocomp, 0, 0);
     sem_init(&finish, 0, 0);
     sem_init(&tradgo, 0, 0);
     
-    pthread_t *list_of_threads = (pthread_t*)malloc(NTHREAD * sizeof(pthread_t));
+    pthread_t **list_of_threads = (pthread_t**)malloc(NTHREAD * sizeof(pthread_t*));
     for(int i = 0; i < NTHREAD; i++){
-        pthread_create(&list_of_threads[i], NULL, traduction, 0);
+    	list_of_threads[i] = (pthread_t*) malloc(sizeof(pthread_t));
+        pthread_create(list_of_threads[i], NULL, traduction, 0);
+        printf("%d\n", i);
     }
     pthread_t *thread_compare = (pthread_t*)malloc(sizeof(pthread_t));
     /*printf("avant pthread_create\n");*/
@@ -112,11 +128,24 @@ int main(int argc, char const *argv[])
         }
         readFile(file);
         close(file);
+        free(filename[i]);
     }
     FINISH = 1;
     
     printf("apres readfile\n");
 	sem_wait(&finish);
+	for (int i = 0; i < NTHREAD; ++i)
+	{
+		free(tab1[i]);
+		free(tab2[i]);
+		pthread_exit(list_of_threads[i]);
+		free(list_of_threads[i]);
+	}
+	free(tab1);
+	free(tab2);
+	free(list_of_threads);
+	pthread_exit(thread_compare);
+	free(thread_compare);
 	return 0;
 }
 int COMPTEUR = 0;
@@ -124,63 +153,97 @@ int COMPTEUR = 0;
 // Prends un fd en argument, stock son contenu dans tab1.
 int readFile(int file){
 	/*printf("debut readfile\n");*/
-	for (int i = 0; i < NTHREAD; ++i)
+	/*for (int i = 0; i < NTHREAD; ++i)
 	{
 		r = read(file, tab1[i], 32);
     	if(r == -1){
         	printf("error\n");
         	exit(1);
     	}
-	}
+    	printf("read %d\n", i);
+    	sem_post(&number_of_full);
+    	//sem_post(&tradgo);
+	}*/
     
-    sem_post(&tradgo);
     /*printf("apres read\n");*/
 	while(r != 0){
 		sem_wait(&number_of_empty);
-		printf("rentre dans la boucle readfile\n");
+		//printf("rentre dans la boucle readfile\n");
         // pthread_mutex_lock(&mutex1);
-        r = read(file, tab1[COMPTEUR], 32);
-        if(r == -1){
-            printf("Erreur lors de la lecture.");
-            exit(1);
+        bool trad = true;
+        if (*tab1[COMPTEUR]=='\0')
+        {
+        	r = read(file, tab1[COMPTEUR], 32);
+        	if(r == -1){
+            	printf("Erreur lors de la lecture.");
+            	exit(1);
+        	}
+        	count+=1;
+        	printf("%d\n", count);
+        	printf("écriture dans le tableau à la place %d du hash %u\n", COMPTEUR, *tab1[COMPTEUR]);
         }
-        COMPTEUR++;
+        else{
+        	trad = false;
+        	sem_post(&number_of_empty);
+        }
+        
+        COMPTEUR+=1;
         if(COMPTEUR >= NTHREAD){
             COMPTEUR = 0;
         }
+        /*if (r == 0)
+        {
+        	FINISH = 1;
+        	printf("FINISH\n");
+        }*/
         // pthread_mutex_unlock(&mutex1);
-        sem_post(&number_of_full);
-        printf("fin de readfile\n");
+        if (trad)
+        {
+        	sem_post(&number_of_full);
+        }
+        
+        //printf("fin de readfile\n");
 	}
-	close(file);
-	return 0;
+	return(EXIT_SUCCESS);
 }
 
-int COMPTEUR2 = 0;
 void *traduction(void *arg){
-	sem_wait(&tradgo);
-	printf("debut traduction\n");
-	while(!FINISH){
+	//sem_wait(&tradgo);
+	//printf("debut traduction\n");
+	int COMPTEUR2 = -1;
+	while(!isTab1Empty(tab1) || !FINISH){
         sem_wait(&number_of_full); // Verifie que les threads ne lisent pas un buffer vide
         pthread_mutex_lock(&mutex2); // Verifie que 2 threads ne le font pas en meme temps
-		printf("rentre dans le while traduction\n");
-        COMPTEUR2++;
+		//printf("rentre dans le while traduction\n");
+		if (FINISH)
+		{
+			sem_post(&full2);
+			return(EXIT_SUCCESS);
+		}
+		COMPTEUR2++;
         if(COMPTEUR2 >= NTHREAD){
             COMPTEUR2 = 0;
         }
         pthread_mutex_unlock(&mutex2);
-        sem_wait(&empty2);
-        printf("avant reversehash\n");
-        if (*tab1[COMPTEUR2] != '\0')
+        
+        //printf("hash : %u, flag : %c, place : %d\n",*tab1[COMPTEUR2], flag[COMPTEUR2], COMPTEUR2);
+        if (*tab1[COMPTEUR2] != '\0' && flag[COMPTEUR2] == '0')
         {
+        	sem_wait(&empty2);
+        	
+        	flag[COMPTEUR2]='1';
         	reversehash(tab1[COMPTEUR2], tab2[COMPTEUR2], 16);
+        	*tab1[COMPTEUR2]='\0';
+        	flag[COMPTEUR2]='0';
+        	printf("--------------------------%s à la place %d-----------------------------\n",tab2[COMPTEUR2], COMPTEUR2);
+        	sem_post(&full2);
+        	sem_post(&number_of_empty);
+        }
+        else{
+        	sem_post(&number_of_full);
         }
         
-        *tab1[COMPTEUR2]='\0';
-        printf("%s\n",tab2[COMPTEUR2]);
-        sem_post(&full2);
-        sem_post(&number_of_empty);
-        printf("fin traduction\n");
+        //printf("fin traduction\n");
 	}
 	return(EXIT_SUCCESS);
 }
@@ -268,42 +331,54 @@ int add_node(list_t *list, char *value){
 	return 0;
 }
 
+
 void *compare(void *arg){
 	printf("debut compare\n");
 	struct list l = {NULL,0};
 	struct list *liste = malloc(sizeof(l));
 	*liste = l;
 	int first=1;
-	while(!FINISH){
+	while(!isTab1Empty(tab1) || !FINISH){
 		sem_wait(&full2);
-		printf("boucle compare\n");
-		if (first)
+		//printf("boucle compare\n");
+		if (*tab2[COMPTEUR3]!='\0' && (first == 1 || strcmp(tab2[COMPTEUR3],liste->first->mdp)!=0))
 		{
-			printf("ok1\n");
-			add_node(liste,tab2);
-			first=0;
-		}
-		else if (countl(CONS, tab2)>countl(CONS, liste->first->mdp))
-		{
-			printf("ok2\n");
-			free(liste);
-			liste = malloc(sizeof(struct list));
-			*liste = (struct list) {NULL,0};
-			int j = add_node(liste,tab2);
-			if (j==1)
+			//printf("comparaison de %s\n", tab2[COMPTEUR3]);
+			if (first)
 			{
-				printf("erreur add_node\n");
+				//printf("ok1\n");
+				add_node(liste,tab2[COMPTEUR3]);
+				first=0;
 			}
+			else if (countl(CONS, tab2[COMPTEUR3])>countl(CONS, liste->first->mdp))
+			{
+				printf("ok2\n");
+				free(liste);
+				liste = malloc(sizeof(struct list));
+				*liste = (struct list) {NULL,0};
+				int j = add_node(liste,tab2[COMPTEUR3]);
+				if (j==1)
+				{
+					printf("erreur add_node\n");
+				}
+
+			}
+			else if (countl(CONS, tab2[COMPTEUR3])==countl(CONS, liste->first->mdp))
+			{
+				//printf("ok3\n");
+				add_node(liste,tab2[COMPTEUR3]);
+			}
+			//tab2[COMPTEUR3]='\0';
 		}
-		else if (countl(CONS, tab2)==countl(CONS, liste->first->mdp))
+		COMPTEUR3+=1;
+		if (COMPTEUR3>=NTHREAD)
 		{
-			printf("ok3\n");
-			add_node(liste,tab2);
+			COMPTEUR3=0;
 		}
 		sem_post(&empty2);
-		printf("fin boucle compare\n");
+		//printf("fin boucle compare\n");
 	}
-	printf("apres le while compare\n");
+	//printf("apres le while compare\n");
 	struct node *pointeur = malloc(sizeof(struct node));
 	pointeur = liste->first;
 	/*int file_out = open("file_out.txt",O_WRONLY|O_CREAT|O_TRUNC|O_APPEND);*/
@@ -319,7 +394,19 @@ void *compare(void *arg){
 	return EXIT_SUCCESS;
 }
 
-bool isTabEmpty(uint8_t** tab){
+bool isTab1Empty(uint8_t** tab){
+	for (int i = 0; i < NTHREAD; ++i)
+	{
+		if (*tab[i] !='\0')
+		{
+			return false;
+		}
+	}
+	//printf("empty\n");
+	return true;
+}
+
+bool isTab2Empty(char** tab){
 	for (int i = 0; i < NTHREAD; ++i)
 	{
 		if (*tab[i] !='\0')

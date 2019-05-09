@@ -39,6 +39,7 @@ int countl(int cons, char *str);
 node_t *init_node(char *value);
 int add_node(list_t *list, char *value);
 void *compare(void *arg);
-bool isTabEmpty(uint8_t **tab);
+bool isTab1Empty(uint8_t **tab);
+bool isTab2Empty(char **tab);
 
 #endif
