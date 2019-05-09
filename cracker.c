@@ -34,8 +34,8 @@ pthread_mutex_t mutex2;
 char **filename;
 
 int FINISH = 0;
-uint8_t *tab1;
-char *tab2;
+uint8_t **tab1;
+char **tab2;
 int r;
 
 int main(int argc, char const *argv[])
@@ -46,20 +46,24 @@ int main(int argc, char const *argv[])
 	{
 		if (strcmp(argv[i],"-t")==0)
 		{
+			printf("-t\n");
 			NTHREAD = atoi(argv[i+1]);
 			i+=1;
 		}
-		if (strcmp(argv[i],"-c")==0)
+		else if (strcmp(argv[i],"-c")==0)
 		{
+			printf("-c\n");
 			CONS = 1;
 		}
-		if (strcmp(argv[i],"-o")==0)
+		else if (strcmp(argv[i],"-o")==0)
 		{
+			printf("-o\n");
 			FILEOUT = (char*) malloc(sizeof(argv[i+1]));
 			strcpy(FILEOUT, argv[i+1]);
 			i+=1;
 		}
 		else{
+			printf("file\n");
 			filename = (char**) malloc(argc-i);
 			for (int j = 0; j <= argc-i; ++j)
 			{
@@ -72,9 +76,15 @@ int main(int argc, char const *argv[])
 		}
 
 	}
-	tab1 = (uint8_t*)malloc(NTHREAD*sizeof(char));
-	/*tab1[0] = (uint8_t*)malloc(sizeof(uint8_t)*32);*/
-	tab2 = (char*)malloc(16*sizeof(char));
+	tab1 = (uint8_t**)malloc(NTHREAD*sizeof(char*));
+	for (int i = 0; i < NTHREAD; ++i)
+	{
+		tab1[i] = (uint8_t*)malloc(32);
+	}
+	tab2 = (char**)malloc(sizeof(char*));
+	{
+		tab2[i] = (char*)malloc(16);
+	}
     sem_init(&number_of_empty, 0, NTHREAD-1);
     sem_init(&number_of_full, 0, 1);
     sem_init(&empty2, 0, 1);
@@ -109,23 +119,27 @@ int main(int argc, char const *argv[])
 	sem_wait(&finish);
 	return 0;
 }
-int COMPTEUR = 1;
+int COMPTEUR = 0;
 
 // Prends un fd en argument, stock son contenu dans tab1.
 int readFile(int file){
 	/*printf("debut readfile\n");*/
-    r = read(file, tab1, 32);
-    if(r == -1){
-        printf("error\n");
-        exit(1);
-    }
+	for (int i = 0; i < NTHREAD; ++i)
+	{
+		r = read(file, tab1[i], 32);
+    	if(r == -1){
+        	printf("error\n");
+        	exit(1);
+    	}
+	}
+    
     sem_post(&tradgo);
     /*printf("apres read\n");*/
 	while(r != 0){
 		sem_wait(&number_of_empty);
 		printf("rentre dans la boucle readfile\n");
         // pthread_mutex_lock(&mutex1);
-        r = read(file, tab1, 32);
+        r = read(file, tab1[COMPTEUR], 32);
         if(r == -1){
             printf("Erreur lors de la lecture.");
             exit(1);
@@ -157,13 +171,13 @@ void *traduction(void *arg){
         pthread_mutex_unlock(&mutex2);
         sem_wait(&empty2);
         printf("avant reversehash\n");
-        if (*tab1 != '\0')
+        if (*tab1[COMPTEUR2] != '\0')
         {
-        	reversehash(tab1, tab2, 16);
+        	reversehash(tab1[COMPTEUR2], tab2[COMPTEUR2], 16);
         }
         
-        *tab1='\0';
-        printf("%s\n",tab2);
+        *tab1[COMPTEUR2]='\0';
+        printf("%s\n",tab2[COMPTEUR2]);
         sem_post(&full2);
         sem_post(&number_of_empty);
         printf("fin traduction\n");
