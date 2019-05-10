@@ -1,6 +1,5 @@
-#include "../src/cracker.h"
-#include "../src/reverse.h"
-#include "../src/sha256.h"
+#include <stdio.h>
+
 
 int main(int argc, char const *argv[])
 {

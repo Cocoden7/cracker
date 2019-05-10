@@ -1,0 +1,395 @@
+commit 9fa69254fa6c3ae6f260b5d6cfc7acf5e70688fc (HEAD -> master, origin/master)
+Author: Jerome <jerome.delforge@student.uclouvain.be>
+Date:   Fri May 10 15:05:10 2019 +0200
+
+    template de base
+
+ Makefile                           |  47 +++++++++++++++---
+ cracker.c => src/cracker.c         |  99 ++++++++++++-------------------------
+ cracker.h => src/cracker.h         |  43 +++++++++-------
+ {test_input => tests}/01_4c_1k.bin | Bin
+ {test_input => tests}/01_4c_1k.txt |   0
+ {test_input => tests}/02_6c_5.bin  |   0
+ {test_input => tests}/02_6c_5.txt  |   0
+ tests/test1.c                      |   9 ++++
+ tests/test2.c                      |   9 ++++
+ tests/test3.c                      |   9 ++++
+ 10 files changed, 124 insertions(+), 92 deletions(-)
+
+commit ef7c10f173a37851e925d203971d8dac3d090265
+Author: Jerome <jerome.delforge@student.uclouvain.be>
+Date:   Fri May 10 01:11:34 2019 +0200
+
+    version fonctionnelle avec le fichier de gros mots de passe
+
+Author: Jerome <jerome.delforge@student.uclouvain.be>
+Date:   Fri May 10 15:05:10 2019 +0200
+
+    template de base
+
+ Makefile                           |  47 +++++++++++++++---
+ cracker.c => src/cracker.c         |  99 ++++++++++++-------------------------
+ cracker.h => src/cracker.h         |  43 +++++++++-------
+ {test_input => tests}/01_4c_1k.bin | Bin
+ {test_input => tests}/01_4c_1k.txt |   0
+ {test_input => tests}/02_6c_5.bin  |   0
+ {test_input => tests}/02_6c_5.txt  |   0
+ tests/test1.c                      |   9 ++++
+ tests/test2.c                      |   9 ++++
+ tests/test3.c                      |   9 ++++
+ 10 files changed, 124 insertions(+), 92 deletions(-)
+
+commit ef7c10f173a37851e925d203971d8dac3d090265
+Author: Jerome <jerome.delforge@student.uclouvain.be>
+Date:   Fri May 10 01:11:34 2019 +0200
+
+    version fonctionnelle avec le fichier de gros mots de passe
+
+ Makefile  |   2 +-
+ cracker.c | 201 ++++++++++++++++++++++++++++++++++++++++++++------------------
+ cracker.h |   3 +-
+ 3 files changed, 147 insertions(+), 59 deletions(-)
+
+commit 2a8e94b7495d42998ef7c536fc28435b61b5ac05
+Author: Jerome <jerome.delforge@student.uclouvain.be>
+Date:   Thu May 9 12:44:39 2019 +0200
+
+    modifications
+
+ cracker.c | 50 ++++++++++++++++++++++++++++++++------------------
+ 1 file changed, 32 insertions(+), 18 deletions(-)
+
+commit 59e16cb56f4e2a227541934d7de7bcc506c31bbe
+Author: Jerome <jerome.delforge@student.uclouvain.be>
+Date:   Thu May 9 11:52:41 2019 +0200
+
+    fonctionne avec plusieurs fichiers
+
+ cracker.c | 52 ++++++++++++++++++++++++++++++++++------------------
+ 1 file changed, 34 insertions(+), 18 deletions(-)
+
+commit 313d87706cf397eda622efa7561e4b114951b98c
+Author: Jerome <jerome.delforge@student.uclouvain.be>
+Date:   Thu May 9 00:41:16 2019 +0200
+
+    clean du makefile
+
+ Makefile  | 19 ++++++++++++++++---
+ cracker.h |  4 ++--
+ 2 files changed, 18 insertions(+), 5 deletions(-)
+
+commit d36c8b33fc14c587a85158df21c1041c6ead7917
+Author: Cocoden7 <49983235+Cocoden7@users.noreply.github.com>
+Date:   Wed May 8 23:56:46 2019 +0200
+
+    Delete 02_6c_5.txt
+
+ 02_6c_5.txt | 5 -----
+ 1 file changed, 5 deletions(-)
+
+commit 8c59f1de5cbaaffe53e88f0798831bc99f97bb40
+Author: Cocoden7 <49983235+Cocoden7@users.noreply.github.com>
+Date:   Wed May 8 23:56:37 2019 +0200
+
+    Delete 02_6c_5.bin
+
+ 02_6c_5.bin | 5 -----
+ 1 file changed, 5 deletions(-)
+
+commit 98b94c3332b1e1a998ee630f04c42340b68a6b25
+Author: Cocoden7 <49983235+Cocoden7@users.noreply.github.com>
+Date:   Wed May 8 23:56:28 2019 +0200
+
+    Delete 01_4c_1k.txt
+
+ 01_4c_1k.txt | 1000 ----------------------------------------------------------
+ 1 file changed, 1000 deletions(-)
+
+commit 8d3d0b59aeca98ab6670ed05b40b3a1326f85d96
+Author: Cocoden7 <49983235+Cocoden7@users.noreply.github.com>
+Date:   Wed May 8 23:56:18 2019 +0200
+
+    Delete 01_4c_1k.bin
+
+ 01_4c_1k.bin | Bin 32000 -> 0 bytes
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+
+commit cf411f310597f1f8252f438138e982f6e283a078
+Author: Corentin Denis <corentin.denis@live.be>
+Date:   Wed May 8 23:57:50 2019 +0200
+
+    test_input
+
+ test_input/01_4c_1k.bin |  Bin 0 -> 32000 bytes
+ test_input/01_4c_1k.txt | 1000 +++++++++++++++++++++++++++++++++++++++++++++++
+ test_input/02_6c_5.bin  |    5 +
+ test_input/02_6c_5.txt  |    5 +
+ 4 files changed, 1010 insertions(+)
+
+commit e5d675e7752332f9660c7137f881206b914bf3ea
+Author: Cocoden7 <49983235+Cocoden7@users.noreply.github.com>
+Date:   Wed May 8 23:54:10 2019 +0200
+
+    Delete cracker2
+
+ cracker2 | Bin 45200 -> 0 bytes
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+
+commit 660ab60096d162c2753c4c6a03380e49e26d9149
+Author: Cocoden7 <49983235+Cocoden7@users.noreply.github.com>
+Date:   Wed May 8 23:54:02 2019 +0200
+
+    Delete cracker2.c
+
+ cracker2.c | 301 -------------------------------------------------------------
+ 1 file changed, 301 deletions(-)
+
+commit 8fd77c71c225996bf6afc72af755717251722192
+Author: Cocoden7 <49983235+Cocoden7@users.noreply.github.com>
+Date:   Wed May 8 23:53:15 2019 +0200
+
+    Delete cracker2.h
+
+ cracker2.h | 44 --------------------------------------------
+ 1 file changed, 44 deletions(-)
+
+commit b597c7429aeb16c7e17a301d67a27d5cb79e045a
+Merge: a2c283f f9f3dbc
+Author: Corentin Denis <corentin.denis@live.be>
+Date:   Wed May 8 23:54:47 2019 +0200
+
+    Merge branch 'master' of https://github.com/Cocoden7/cracker
+
+commit a2c283f63eb430a8df74165d42d8049b670ee97c
+Author: Corentin Denis <corentin.denis@live.be>
+Date:   Wed May 8 23:54:12 2019 +0200
+
+    cracker.h
+
+ cracker.h | 44 ++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 44 insertions(+)
+
+commit f9f3dbcb0a971550503c732c6c5e4d86af28611b
+Author: Cocoden7 <49983235+Cocoden7@users.noreply.github.com>
+Date:   Wed May 8 23:50:21 2019 +0200
+
+    delete reve
+
+ reverse.c | 50 --------------------------------------------------
+ 1 file changed, 50 deletions(-)
+
+commit ff1da8292e674498f1313eec0515081a5b9ca2f3
+Author: Corentin Denis <corentin.denis@live.be>
+Date:   Wed May 8 23:47:07 2019 +0200
+
+    arrangement_dossier
+
+ cracker.c | 212 ++++++++++++++++++++++++++++++++++++++++++++------------------
+ 1 file changed, 152 insertions(+), 60 deletions(-)
+
+commit bb55018bbe10b5d91d68c664abf0f6947e3a6d04
+Author: Jerome <jerome.delforge@student.uclouvain.be>
+Date:   Wed May 8 23:07:35 2019 +0200
+
+    version fonctionelle avec un thread
+
+ test-input/01_4c_1k.bin => 01_4c_1k.bin | Bin
+ test-input/01_4c_1k.txt => 01_4c_1k.txt |   0
+ test-input/02_6c_5.bin => 02_6c_5.bin   |   0
+ test-input/02_6c_5.txt => 02_6c_5.txt   |   0
+ Makefile                                |   2 +-
+ cracker2                                | Bin 0 -> 45200 bytes
+ cracker2.c                              | 132 ++++++++++++++++++++++----------
+ cracker2.h                              |   3 +-
+ reverse.c                               |  50 ++++++++++++
+ 9 files changed, 144 insertions(+), 43 deletions(-)
+
+commit fc9f3f33885c6f37861d752ae5728e12633a49c4
+Author: Jerome <jerome.delforge@student.uclouvain.be>
+Date:   Tue May 7 15:49:37 2019 +0200
+
+    readfile_et_traduction_fonctionnent
+
+ cracker2.c | 61 +++++++++++++++++++++++++++++++++++--------------------------
+ 1 file changed, 35 insertions(+), 26 deletions(-)
+
+commit 2a93816625aecd401a411d6f3ceb2b987e127e5a
+Author: Jerome <jerome.delforge@student.uclouvain.be>
+Date:   Tue May 7 14:17:37 2019 +0200
+
+    cracker2
+
+ Makefile   |   7 +-
+ cracker2.c | 242 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ cracker2.h |  43 +++++++++++
+ 3 files changed, 289 insertions(+), 3 deletions(-)
+
+commit a90c8a7b78b070392dd60de85dd9c0aae3192f84
+Author: Jerome <jerome.delforge@student.uclouvain.be>
+Date:   Tue May 7 11:25:43 2019 +0200
+
+    compare
+
+ cracker.c | 116 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++---
+ 1 file changed, 112 insertions(+), 4 deletions(-)
+
+commit 636f3d2eb6439a98074e04fe8b2a598f85f385fc
+Author: Jerdelforge <48588677+Jerdelforge@users.noreply.github.com>
+Date:   Sun May 5 15:20:10 2019 +0200
+
+    Update Makefile
+
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 39a5159bdd2ce7a83eb18a5d36c9b25f74f64218
+Author: Jerdelforge <48588677+Jerdelforge@users.noreply.github.com>
+Date:   Sun May 5 15:01:56 2019 +0200
+
+    Update Makefile
+
+ Makefile | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+commit 896c038444c1729fb51d2e0927b0f5992be54556
+Author: Corentin Denis <corentin.denis@live.be>
+Date:   Thu May 2 14:56:06 2019 +0200
+
+    SemaphoresEtMutex
+
+ cracker.c | 75 +++++++++++++++++++++++++++++++++++++++------------------------
+ 1 file changed, 47 insertions(+), 28 deletions(-)
+
+commit 35c6da683dbcde4b9d840a3f54b670c96c103c3e
+Author: Corentin Denis <corentin.denis@live.be>
+Date:   Tue Apr 30 21:09:14 2019 +0200
+
+    readFile
+
+ cracker.c | 38 ++++++++++++++++++++++++--------------
+ 1 file changed, 24 insertions(+), 14 deletions(-)
+
+commit 1ded6f5a0c11e454268f32c839239bbb3ae5aced
+Author: Jerome <jerome.delforge@student.uclouvain.be>
+Date:   Mon Apr 29 15:35:50 2019 +0200
+
+    correction
+
+ cracker/Makefile                |    1 -
+ cracker/cracker.c               |   49 --
+ cracker/src/reverse.c           |   50 --
+ cracker/src/reverse.h           |   18 -
+ cracker/src/sha256.c            |  563 ----------------------
+ cracker/src/sha256.h            |   91 ----
+ cracker/test-input/01_4c_1k.bin |  Bin 32000 -> 0 bytes
+ cracker/test-input/01_4c_1k.txt | 1000 ---------------------------------------
+ cracker/test-input/02_6c_5.bin  |    5 -
+ cracker/test-input/02_6c_5.txt  |    5 -
+ 10 files changed, 1782 deletions(-)
+
+commit e7b6b7cbcfee522968d23b7519900444af9522cb
+Author: Jerome <jerome.delforge@student.uclouvain.be>
+Date:   Mon Apr 29 15:26:20 2019 +0200
+
+    template du tuteur
+
+ cracker/Makefile                |    1 +
+ cracker/cracker.c               |   49 ++
+ cracker/src/reverse.c           |   50 ++
+ cracker/src/reverse.h           |   18 +
+ cracker/src/sha256.c            |  563 ++++++++++++++++++++++
+ cracker/src/sha256.h            |   91 ++++
+ cracker/test-input/01_4c_1k.bin |  Bin 0 -> 32000 bytes
+ cracker/test-input/01_4c_1k.txt | 1000 +++++++++++++++++++++++++++++++++++++++
+ cracker/test-input/02_6c_5.bin  |    5 +
+ cracker/test-input/02_6c_5.txt  |    5 +
+ 10 files changed, 1782 insertions(+)
+
+commit 637376caa3493b8e0a678ccdc3ca86773c5221a3
+Author: Jerome <jerome.delforge@student.uclouvain.be>
+Date:   Sun Apr 28 15:36:04 2019 +0200
+
+    fonction traduction
+
+ cracker.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+commit 83ca02dea10a6940f383ca79860dfcd4aef5787a
+Author: Jerome <jerome.delforge@student.uclouvain.be>
+Date:   Sat Apr 27 18:34:01 2019 +0200
+
+    Fichiers template
+
+ Makefile                |    1 +
+ src/reverse.c           |   50 +++
+ src/reverse.h           |   18 +
+ src/sha256.c            |  563 ++++++++++++++++++++++++++
+ src/sha256.h            |   91 +++++
+ test-input/01_4c_1k.bin |  Bin 0 -> 32000 bytes
+ test-input/01_4c_1k.txt | 1000 +++++++++++++++++++++++++++++++++++++++++++++++
+ test-input/02_6c_5.bin  |    5 +
+ test-input/02_6c_5.txt  |    5 +
+ 9 files changed, 1733 insertions(+)
+
+commit 911f735130eac8d244fa3dc86c12efb0130bf00e
+Author: Jerome <jerome.delforge@student.uclouvain.be>
+Date:   Sat Apr 27 18:33:10 2019 +0200
+
+    fonction traduction
+
+ cracker.c | 26 ++++++++++++++++++++++----
+ 1 file changed, 22 insertions(+), 4 deletions(-)
+
+commit 8b0ec905de66df32fce07ade7b278fe2a6a96630
+Author: Jerome <jerome.delforge@student.uclouvain.be>
+Date:   Fri Apr 26 15:45:39 2019 +0200
+Date:   Fri Apr 26 15:45:39 2019 +0200
+    Fichiers template
+
+ Makefile                |    1 +
+ src/reverse.c           |   50 +++
+ src/reverse.h           |   18 +
+ src/sha256.c            |  563 ++++++++++++++++++++++++++
+ src/sha256.h            |   91 +++++
+ test-input/01_4c_1k.bin |  Bin 0 -> 32000 bytes
+ test-input/01_4c_1k.txt | 1000 +++++++++++++++++++++++++++++++++++++++++++++++
+ test-input/02_6c_5.bin  |    5 +
+ test-input/02_6c_5.txt  |    5 +
+ 9 files changed, 1733 insertions(+)
+
+commit 911f735130eac8d244fa3dc86c12efb0130bf00e
+Author: Jerome <jerome.delforge@student.uclouvain.be>
+Date:   Sat Apr 27 18:33:10 2019 +0200
+
+    fonction traduction
+
+ cracker.c | 26 ++++++++++++++++++++++----
+ 1 file changed, 22 insertions(+), 4 deletions(-)
+
+commit 8b0ec905de66df32fce07ade7b278fe2a6a96630
+Author: Jerome <jerome.delforge@student.uclouvain.be>
+Date:   Fri Apr 26 15:45:39 2019 +0200
+
+    fonction readfile
+
+ cracker.c | 24 +++++++++++++++++++++++-
+ 1 file changed, 23 insertions(+), 1 deletion(-)
+
+commit f4976ead4db6ba2d16db12faca4abeef7d1affe1
+Author: Jerome <jerome.delforge@student.uclouvain.be>
+Date:   Fri Apr 26 15:13:09 2019 +0200
+
+    gestion des args
+
+ cracker.c | 22 ++++++++++++++++++++++
+ 1 file changed, 22 insertions(+)
+
+commit 04abc986375ae77e388e7dc26cde75b6df852c4d
+Author: Jerome <jerome.delforge@student.uclouvain.be>
+Date:   Fri Apr 26 14:49:41 2019 +0200
+
+    test
+
+ cracker.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+(END)

@@ -8,15 +8,10 @@ cracker : src/cracker.c src/cracker.h src/reverse.c src/reverse.h src/sha256.c s
 	gcc -o cracker sha256.o reverse.o cracker.o -pthread
 
 tests : src/cracker.c src/cracker.h src/reverse.c src/reverse.h src/sha256.c src/sha256.h tests/test1.c tests/test2.c tests/test3.c
-	gcc -c tests/test1.c -Wall -Werror -std=c99 -g
-	gcc -o test1 sha256.o reverse.o cracker.o -pthread
 	gcc -c tests/test2.c -Wall -Werror -std=c99 -g
 	gcc -o test2 sha256.o reverse.o cracker.o -pthread
 	gcc -c tests/test3.c -Wall -Werror -std=c99 -g
 	gcc -o test2 sha256.o reverse.o cracker.o -pthread
-	./test1
-	./cracker tests/02_6c_5.bin
-	./cracker -c tests/02_6c_5.bin
 	./test2
 	./cracker -t 2 tests/02_6c_5.bin
 	./cracker -t 2 -c tests/02_6c_5.bin
@@ -29,15 +24,10 @@ all : src/cracker.c src/cracker.h src/reverse.c src/reverse.h src/sha256.c src/s
 	gcc -c src/sha256.c
 	gcc -c src/reverse.c
 	gcc -o cracker sha256.o reverse.o cracker.o -pthread
-	gcc -c tests/test1.c -Wall -Werror -std=c99 -g
-	gcc -o test1 sha256.o reverse.o cracker.o -pthread
 	gcc -c tests/test2.c -Wall -Werror -std=c99 -g
 	gcc -o test2 sha256.o reverse.o cracker.o -pthread
 	gcc -c tests/test3.c -Wall -Werror -std=c99 -g
 	gcc -o test2 sha256.o reverse.o cracker.o -pthread
-	./test1
-	./cracker tests/02_6c_5.bin
-	./cracker -c tests/02_6c_5.bin
 	./test2
 	./cracker -t 2 tests/02_6c_5.bin
 	./cracker -t 2 -c tests/02_6c_5.bin
