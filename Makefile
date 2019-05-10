@@ -1,16 +1,49 @@
 CFLAGS= -o cracker -Wall -Werror -std=c99 -pthread -g
-TARGETS = cracker *.o
+TARGETS = cracker test1 test2 test3 *.o
 
-cracker : cracker.c cracker.h src/reverse.c src/reverse.h src/sha256.c src/sha256.h
-	gcc -c cracker.c -Wall -Werror -std=c99 -g
+cracker : src/cracker.c src/cracker.h src/reverse.c src/reverse.h src/sha256.c src/sha256.h
+	gcc -c src/cracker.c -Wall -Werror -std=c99 -g
 	gcc -c src/sha256.c
 	gcc -c src/reverse.c
 	gcc -o cracker sha256.o reverse.o cracker.o -pthread
 
-#tests : cracker.c cracker.h src/reverse.c src/reverse.h src/sha256.c src/sha256.h test_compare.c
-#	gcc -c test_compare.c -Wall -Werror -std=c99 -g
-#	gcc -o test_compare cracker.o sha256.o reverse.o test_compare.o -pthread
-#	./test_compare test_input/test_compare_src.txt
+tests : src/cracker.c src/cracker.h src/reverse.c src/reverse.h src/sha256.c src/sha256.h tests/test1.c tests/test2.c tests/test3.c
+	gcc -c tests/test1.c -Wall -Werror -std=c99 -g
+	gcc -o test1 sha256.o reverse.o cracker.o -pthread
+	gcc -c tests/test2.c -Wall -Werror -std=c99 -g
+	gcc -o test2 sha256.o reverse.o cracker.o -pthread
+	gcc -c tests/test3.c -Wall -Werror -std=c99 -g
+	gcc -o test2 sha256.o reverse.o cracker.o -pthread
+	./test1
+	./cracker tests/02_6c_5.bin
+	./cracker -c tests/02_6c_5.bin
+	./test2
+	./cracker -t 2 tests/02_6c_5.bin
+	./cracker -t 2 -c tests/02_6c_5.bin
+	./test3
+	./cracker -t 3 tests/02_6c_5.bin
+	./cracker -t 3 -c tests/02_6c_5.bin
+
+all : src/cracker.c src/cracker.h src/reverse.c src/reverse.h src/sha256.c src/sha256.h tests/test1.c tests/test2.c tests/test3.c
+	gcc -c src/cracker.c -Wall -Werror -std=c99 -g
+	gcc -c src/sha256.c
+	gcc -c src/reverse.c
+	gcc -o cracker sha256.o reverse.o cracker.o -pthread
+	gcc -c tests/test1.c -Wall -Werror -std=c99 -g
+	gcc -o test1 sha256.o reverse.o cracker.o -pthread
+	gcc -c tests/test2.c -Wall -Werror -std=c99 -g
+	gcc -o test2 sha256.o reverse.o cracker.o -pthread
+	gcc -c tests/test3.c -Wall -Werror -std=c99 -g
+	gcc -o test2 sha256.o reverse.o cracker.o -pthread
+	./test1
+	./cracker tests/02_6c_5.bin
+	./cracker -c tests/02_6c_5.bin
+	./test2
+	./cracker -t 2 tests/02_6c_5.bin
+	./cracker -t 2 -c tests/02_6c_5.bin
+	./test3
+	./cracker -t 3 tests/02_6c_5.bin
+	./cracker -t 3 -c tests/02_6c_5.bin
 
 
 

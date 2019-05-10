@@ -10,24 +10,33 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdbool.h>
-#include "src/reverse.h"
-#include "src/sha256.h"
+#include "reverse.h"
+#include "sha256.h"
 
-extern int NTHREAD = 1;
-extern int CONS = 0;
-extern int FILEOUT = 0;
-extern sem_t number_of_empty;
-extern sem_t number_of_full;
-extern pthread_mutex_t mutex1;
-extern pthread_mutex_t mutex2;
-extern const char filename = 'c';
-extern int FINISH = 0;
-extern uint8_t **tab1;
-extern char **tab2;
-extern int COMPTEUR = 1;
-extern int COMPTEUR2 = 1;
-extern int sizetab;
-extern char voyelles[6] = {'a','e','i','o','u','y'};
+int NTHREAD = 1;
+int CONS = 0;
+int FILEOUT = 0;
+sem_t number_of_empty;
+sem_t number_of_full;
+pthread_mutex_t mutex2;
+const char filename = 'c';
+int FINISH = 0;
+uint8_t **tab1;
+char **tab2;
+int COMPTEUR = 1;
+int COMPTEUR2 = 1;
+int sizetab;
+char voyelles[6] = {'a','e','i','o','u','y'};
+typedef struct node
+{
+	struct node *next;
+	char* mdp;
+}node_t;
+
+typedef struct list {
+  struct node *first;
+  int size;
+} list_t;
 
 void *traduction(void *arg);
 int readFile(int file);
